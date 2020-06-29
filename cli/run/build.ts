@@ -28,7 +28,12 @@ export default async function build(
 				.map((name) => (inputOptions.input as Record<string, string>)[name])
 				.join(', ');
 		}
-		stderr(color.cyan(`\n${color.bold(inputFiles!)} → ${color.bold(files.join(', '))}...`));
+		const message = color.cyan(`\n${color.bold(inputFiles!)} → ${color.bold(files.join(', '))}...`);
+		if (useStdout) {
+			stderr(message);
+		} else {
+			process.stdout.write(message);
+		}
 	}
 
 	const bundle = await rollup.rollup(inputOptions as any);
@@ -65,7 +70,7 @@ export default async function build(
 	await Promise.all(outputOptions.map(bundle.write));
 	if (!silent) {
 		warnings.flush();
-		stderr(
+		process.stdout.write(
 			color.green(
 				`created ${color.bold(files.join(', '))} in ${color.bold(ms(Date.now() - start))}`
 			)
